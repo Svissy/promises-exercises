@@ -7,8 +7,12 @@
  */
 function flatMapPromise(promise, asyncTransformer){
   return new Promise((resolve, reject) => {
-    promise
-      .then(/* IMPLEMENT ME! */);
+    promise.then(
+      result => {
+        resolve(asyncTransformer(result));
+      },
+      error => reject(error)
+    );
   });
 }
 
@@ -20,7 +24,7 @@ function flatMapPromise(promise, asyncTransformer){
  * @param {function} slowAsyncProcess 
  */
 function chainTwoAsyncProcesses(firstPromise, slowAsyncProcess){
-  return firstPromise.then(/* IMPLEMENT ME! */);
+  return firstPromise.then(result => slowAsyncProcess(result));
 }
 
 /**
@@ -31,8 +35,17 @@ function chainTwoAsyncProcesses(firstPromise, slowAsyncProcess){
  * @param {function} getOrganizationById 
  */
 function makeGetUserByIdWithOrganization(getUserById, getOrganizationById){
-  return function getUserByIdWithOrganization(userId){
-    /* IMPLEMENT ME! */
+  return function getUserByIdWithOrganization(userId) {
+    return getUserById(userId).then((user) => {
+      if (!user) return undefined;
+      return getOrganizationById(user.organizationId).then(
+        organization => {
+          if (organization) return { ...user, organization };
+          throw 'Organization not found';
+        },
+        () => undefined
+      );
+    });
   };
 }
 
